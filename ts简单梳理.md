@@ -109,6 +109,31 @@ function throwError(str: string): never{
 
 java一样
 
+##### ATT
+
+当使用**类型声明**限制函数返回值为`void`时，TS并不会严格要求函数返回空
+
+```typescript
+type LogFunc = () => void;
+// 此时不会报错
+const f1: LogFunc = () =>{
+	return 66
+}
+```
+
+why?
+
+为了确保以下代码成里，我们知道 `Array.prototype.push`的返回一个数字，而`Array.prototype.forEach`方法是期望其回调的返回值是`void`
+
+```typescript
+const src = [1,2,3];
+const dst = [0];
+// 箭头函数只有一句的且简写的时候，会把值自动作为return的值，比如push会返回长度，那么这里就会return number
+src.forEach((el) => dst.push(el))
+```
+
+
+
 #### object
 
 ##### object
@@ -181,6 +206,334 @@ enum Direction{
 }
 
 console.log(Direction)
+//{0: 'Up', 1: 'Down', 2: 'Left', 3: 'Right', Up: 0, Down: 1, Left: 2, Right: 3}
+```
+
+##### 常量枚举 - 数字内联
+
+常量枚举是一种特殊的枚举类型，它使用const关键字定义，**在编译时会被内联，避免生成一些额外的代码**
+
+`内联 指TS在编译时，把枚举成员引用替换为他们的实际值，而不是生成额外的枚举对象，这样可以减少生成的代码量，并且提高性能。`
+
+#### type
+
+`  | and & `
+
+type可以为任意类型创建别名
+
+##### 基本用法
+
+```typescript
+type num = number;
+
+let price: num;
+price = 100;
+```
+
+##### 联合类型
+
+```typescript
+type Status = number | string
+type Gender = '男' | '女'
+
+function printStatus(status: Status){
+    console.log(status);
+}
+
+function logGender(str: Gender){
+    console.log(str)
+}
+```
+
+##### 交叉类型
+
+其实就是`并区间`的概念
+
+如：
+
+```typescript
+type Status = number | string
+type Gender = '男' | '女'
+// 此时aa将只能是'男' | '女'
+type aa = Status & Gender;
 
 ```
 
+```typescript
+type Area = {
+    height: number;
+    width: number;
+}
+
+type Address = {
+    num: number;
+    cell: number;
+    room: string;
+}
+
+type House = Area & Address
+
+const house:House={
+    height:100,
+    width:100,
+    num:3,
+    cell:4,
+    room:'702'
+} 
+```
+
+# 类
+
+和java一样，可实现多个接口，用法也和java一样
+
+## 封装
+
+```typescript
+// 定义
+class Person{
+  name:string;
+  age: number;
+  constructor(name:string,age:number){
+    this.name = name;
+    this.age = age;
+  }
+  speak():string{
+    return this.name
+  }
+}
+
+const p1 = new Person('张三',18)
+p1.speak
+```
+
+## 继承
+
+```typescript
+// 继承
+class Student extends Person{
+  grade:string;
+  constructor(name:string,age:number,grade:string){
+    super(name,age)
+    this.grade = grade;
+  }
+  // 如果打算覆写最好加 override
+  override speak(): string {
+      return "stu"
+  }
+  study():string{
+    return `${this.name}are learning in ${this.grade}`
+  }
+}
+```
+
+## 属性修饰符
+
+| 修饰符    | 含义     | 具体规则                            |
+| --------- | -------- | ----------------------------------- |
+| public    | 公开的   | 类内部，子类，类外部使用            |
+| protected | 受保护的 | 类内部，子类使用                    |
+| private   | 私有的   | 类内部使用                          |
+| readonly  | 只读属性 | 属性无法更改，只能在construct中使用 |
+
+## 抽象+继承
+
+`  constructor(public weight: number) {}直接默认生成了，可调`
+
+```typescript
+// 定义
+abstract class Package {
+  constructor(public weight: number) {}
+  abstract calculate(x: number, y: number): number;
+  printPackage() {
+    console.log(`包裹重量为${this.weight}`);
+  }
+}
+class StandardPackage extends Package {
+  constructor(weight: number, public unitPrice: number) {
+    super(weight);
+  }
+  calculate(x: number, y: number): number {
+    return this.weight * this.unitPrice;
+  }
+}
+```
+
+## 接口
+
+拓展第三方库类型
+
+**和java中不一样，java不能继承，只能实现**
+
+### 定义类的结构
+
+```typescript
+interface PersonInterface{
+  name: string
+  age: number
+  speak(n:number):void
+}
+class Person implements PersonInterface{
+  constructor(
+    public name: string,
+    public age: number,
+  ){}
+  speak(n: number): void {
+    for(let i = 0;i < n;i++){
+      console.log(`${this.name}`)
+    }
+  }
+}
+```
+
+### 定义对象的结构
+
+为了内容完整性了
+
+```typescript
+interface UserInterface{
+  name: string
+  readonly gender:string
+  age?: number
+  run:(n:number) => void
+}
+
+const user: UserInterface = {
+  name: "张三",
+  gender: "男",
+  run: function (n: number): void {
+    console.log(`${this.name} run ${n} meter`)
+  }
+}
+```
+
+### 定义函数的结构
+
+```typescript
+interface CountInterface{
+	(a:number, b:number):number;
+}
+
+const count:CountInterface = (x,y)=>{
+	return x+y
+}
+```
+
+
+
+### 接口之间的继承
+
+```typescript
+interface PersonInterface{
+  name: string
+  age?: number
+}
+
+interface StudentInterface extends PersonInterface {
+  grade:string
+}
+
+const stu:StudentInterface ={ 
+  name:"张三",
+  grade:"一班"
+}
+```
+
+
+
+### 接口的自动合并
+
+一般用于拓展第三方库的类型
+
+```typescript
+interface PersonInterface{
+  name: string
+  age?: number
+}
+
+interface PersonInterface {
+  grade:string
+}
+
+const stu:PersonInterface ={ 
+  name:"张三",
+  grade:"一班"
+}
+```
+
+# 泛型
+
+`泛型允许我们在定义函数，类，或接口的时候，使用类型参数来表示未指定的类型，这些参数在具体使用时，才被直顶具体的类型，泛型能让同一段代码适用于多种类型，同时仍然保持类型的安全`
+
+### 泛型函数
+
+```typescript
+function logData<T>(data: T): T{
+  console.log(data)
+  return data
+}
+
+logData<number>(100);
+logData<string>('hello')
+```
+
+### 泛型可以有多个
+
+```typescript
+function logData2<T,U>(data1: T,data2:U): T | U{
+  console.log(data1,data2)
+  return data2
+}
+
+logData2<number,boolean>(100,true);
+logData2<string,number>('hello',666);
+```
+
+### 泛型接口
+
+```typescript
+interface PersonInterface<T>{
+	name:string,
+	age:number,
+	anyInfo:T
+}
+// 使用
+type GradeInfo = {
+    grade:string;
+    school:string;
+}
+let p:PersonInterface<UserInfo> = {
+	name:'tom',
+    age:18,
+    GradeInfo:{
+        grade :'123';
+    	school:'456';
+    }
+}
+
+```
+
+# 类型说明文件
+
+`类型声明文件是TypeScript的一种特殊文件，通常以.d.ts作为扩展名。它的主要作用是为现有的JavaScript代码提供类型信息，使得TypeScript能够在使用这些JavaScript库时进行类型检查和提示`
+
+通常放到@types文件中
+
+例子：
+
+demo.js
+
+```js
+export function add(a,b){
+    return a+b
+}
+```
+
+demo.d.ts
+
+```typescript
+declate function add(a:number,b:number):number;
+ 
+export {add};
+```
+
+# 装饰器
