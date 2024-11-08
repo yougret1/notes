@@ -537,3 +537,137 @@ export {add};
 ```
 
 # 装饰器
+
+扩展类
+
+### 类装饰器(无法传参)
+
+```typescript
+function fun(target:any){
+	target.prototype.username = '张三'
+}
+
+@fun
+class Person{
+    
+}
+let p1 = new Person();
+console.log(p1.username); // 张三
+```
+
+### 装饰器工厂
+
+人话就是返回一个方法，让方法调用
+
+```typescript
+function fun1(options: any){
+	return (target:any)=>{
+        target.username = options.name;
+        target.prototype.age = options.age;
+    }
+}
+
+@fun1({
+    name:'李四',
+    age:18
+})
+class Obj1{
+    
+}
+
+let obj1 = new Obj1();
+console.log(Obj1.userName, obj1.name , obj1.age)
+```
+
+### 装饰器组合
+
+自上而下先获取到所有的真正的装饰器，然后下到上执行
+
+```typescript
+function demo1( target:any ){
+    console.log('demo1')
+}
+function demo2(  ){
+    console.log('demo2')
+    return ( target:any )=>{
+        console.log('demo2里面')
+    }
+}
+function demo3( ){
+    console.log('demo3')
+    return ( target:any )=>{
+        console.log('demo3里面')
+    }
+}
+function demo4( target:any ){
+    console.log('demo4')
+}
+
+@demo1
+@demo2()
+@demo3()
+@demo4
+class Person{
+
+}
+
+/*结果是：
+demo2
+demo3
+demo4
+demo3里面
+demo2里面
+demo1
+*/
+```
+
+### 属性装饰器
+
+```typescript
+function fun3( arg:any ){
+    return ( target:any , attr:any )=>{
+        target[attr] = arg;
+    }
+}
+
+class Obj3{
+    
+    @fun3('张三')
+    userName:string
+    
+}   
+let obj3 = new Obj3();
+console.log( obj3.userName );
+```
+
+### 方法装饰器
+
+```typescript
+function test(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  console.log(target);
+  console.log(propertyKey);
+  console.log(descriptor);
+  // return descriptor;
+}
+
+class Person {
+
+  @test
+  sayName() :string{
+    console.log('say name...');
+    return 'say name';
+  }
+}
+
+let p = new Person();
+p.sayName();
+
+//最终输出
+/*
+{sayName: ƒ}
+sayName
+{writable: true, enumerable: false, configurable: true, value: ƒ}
+say name...
+*/
+```
+

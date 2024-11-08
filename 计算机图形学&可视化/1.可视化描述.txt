@@ -1,0 +1,11 @@
+如果需要轻量的地图应用，leaflet 和 d3-geo 是不错的选择。
+
+如果需要构建性能要求高的地图应用，mapboxgl 和 deck.gl 是不错的选择。
+
+若需要高度自定制的地图视图，d3-geo 和 OpenLayers 将非常适用。
+
+对于地球模式需要显示大量空间数据，可以选择 Cesium 和 mapboxgl。
+
+而对于三方地图与可视化结合需求，则可以考虑 L7 和 deck.gl 以及 Maptalks。
+
+对于需要丰富的地图组件，则可以考虑 L7 和 mapboxgl。
